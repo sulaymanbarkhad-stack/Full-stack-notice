@@ -13,7 +13,7 @@ const app = express();
 
 app.use(express.json());
 
-app.use("/api", userRoutes);
+app.use("/api/auth", userRoutes);
 
 const normalizePort = (value) => {
   const cleanedValue = String(value ?? "")
