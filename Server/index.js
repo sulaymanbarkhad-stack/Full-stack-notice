@@ -30,6 +30,16 @@ const normalizePort = (value) => {
 
 const Port = normalizePort(process.env.PORT);
 
-app.listen(Port, () => {
-  console.log(`server is running on ${Port}`);
-});
+const startServer = async () => {
+  try {
+    await connect();
+    app.listen(Port, () => {
+      console.log(`server is running on ${Port}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  }
+};
+
+startServer();
