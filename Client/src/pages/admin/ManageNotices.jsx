@@ -21,7 +21,7 @@ export default function ManageNotices() {
 
   const fetchNotices = async () => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/notices/notices`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL?.replace(/\/$/, '')}/api/notices/notices`);
       setNotices(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error(err);
@@ -43,7 +43,7 @@ export default function ManageNotices() {
     
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${import.meta.env.VITE_API_URL}/api/notices/delete/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL?.replace(/\/$/, '')}/api/notices/delete/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       addToast('Notice deleted successfully');

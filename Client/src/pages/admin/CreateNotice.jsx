@@ -58,7 +58,7 @@ export default function CreateNotice() {
         formData.append('image', image);
       }
 
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/notices/create`, formData, {
+      await axios.post(`${import.meta.env.VITE_API_URL?.replace(/\/$/, '')}/api/notices/create`, formData, {
         headers: { 
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}` 

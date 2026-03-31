@@ -18,7 +18,7 @@ export default function ManageUsers() {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/users`, {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL?.replace(/\/$/, '')}/api/auth/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers(res.data);
@@ -35,7 +35,7 @@ export default function ManageUsers() {
     
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${import.meta.env.VITE_API_URL}/api/auth/delete/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL?.replace(/\/$/, '')}/api/auth/delete/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       addToast('User deleted successfully');
@@ -51,7 +51,7 @@ export default function ManageUsers() {
     
     try {
       const token = localStorage.getItem('token');
-      await axios.patch(`${import.meta.env.VITE_API_URL}/api/auth/promote/${id}`, {}, {
+      await axios.patch(`${import.meta.env.VITE_API_URL?.replace(/\/$/, '')}/api/auth/promote/${id}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       addToast('User promoted to Admin successfully');

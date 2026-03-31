@@ -19,15 +19,34 @@ app.use(express.json());
 
 app.use(helmet());
 
-const allowedOrigins = ["http://localhost:5173", "http://localhost:5174"];
-if (process.env.CLIENT_URL) allowedOrigins.push(process.env.CLIENT_URL);
+const allowedOrigins = [
+  "http://localhost:5173", 
+  "http://localhost:5174", 
+  "https://full-stack-notice-fv3e.vercel.app"
+];
+
+if (process.env.CLIENT_URL) {
+  // Add CLIENT_URL if it exists and handles potential trailing slash
+  const cleanClientUrl = process.env.CLIENT_URL.replace(/\/$/, "");
+  if (!allowedOrigins.includes(cleanClientUrl)) {
+    allowedOrigins.push(cleanClientUrl);
+  }
+}
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      const isAllowed = allowedOrigins.some(allowedOrigin => {
+        return origin === allowedOrigin || origin.startsWith(allowedOrigin);
+      });
+
+      if (isAllowed) {
         callback(null, true);
       } else {
+        console.error(`Blocked by CORS: ${origin}`);
         callback(new Error("Not allowed by CORS"));
       }
     },

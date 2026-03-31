@@ -26,7 +26,7 @@ export default function UpdateNotice() {
 
   const fetchNotice = async () => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/notices/notices/${id}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL?.replace(/\/$/, '')}/api/notices/notices/${id}`);
       const notice = res.data;
       setTitle(notice.title);
       setDescription(notice.description);
@@ -56,7 +56,7 @@ export default function UpdateNotice() {
         formData.append('image', image);
       }
 
-      await axios.put(`${import.meta.env.VITE_API_URL}/api/notices/update/${id}`, formData, {
+      await axios.put(`${import.meta.env.VITE_API_URL?.replace(/\/$/, '')}/api/notices/update/${id}`, formData, {
         headers: { 
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}` 

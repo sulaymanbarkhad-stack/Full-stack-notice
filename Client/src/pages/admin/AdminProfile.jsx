@@ -28,7 +28,7 @@ export default function AdminProfile() {
 
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/auth/update/${user._id}`, formData, {
+      const res = await axios.put(`${import.meta.env.VITE_API_URL?.replace(/\/$/, '')}/api/auth/update/${user._id}`, formData, {
         headers: { 
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}` 

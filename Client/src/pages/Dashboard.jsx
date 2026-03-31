@@ -31,7 +31,7 @@ export default function Dashboard() {
 
   const fetchNotices = async () => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/notices/notices`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL?.replace(/\/$/, '')}/api/notices/notices`);
       setNotices(Array.isArray(res.data) ? res.data : []);
     } catch (error) {
       console.error('Failed to fetch notices:', error);
