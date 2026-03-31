@@ -1,26 +1,42 @@
 import mongoose from "mongoose";
 
-const noticeSchema = mongoose.Schema({
+const noticeSchema = new mongoose.Schema(
+  {
     title: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
+      trim: true,
     },
 
     description: {
-        type: String,
-        required: true
-    }, 
+      type: String,
+      required: true,
+    },
 
-    createdAt: {
-        type: Date,
-        default: Date.now
+    image: {
+      type: String, 
     },
 
     createdBy: {
-        type: String,
-        required: true
-    }
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", 
+      required: true,
+    },
 
-})
+    category: {
+      type: String,
+      enum: ["general", "event", "urgent"],
+      default: "general",
+    },
+
+    isImportant: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  {
+    timestamps: true, 
+  }
+);
 
 export default mongoose.model("Notice", noticeSchema);
