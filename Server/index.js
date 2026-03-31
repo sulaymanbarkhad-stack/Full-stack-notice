@@ -61,6 +61,8 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
+app.get("/", (req, res) => res.send("NoticeBoard API is running..."));
+
 // Routes
 app.use("/api/auth", userRoutes);
 app.use("/api/notices", noticeRoutes);
