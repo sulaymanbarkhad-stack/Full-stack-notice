@@ -39,6 +39,17 @@ export const registerUser = async (req, res) => {
 
     // response
     if (user) {
+      // Configuration Verification: Ensure JWT secret is present
+      if (!process.env.JWT_SECRET_KEY) {
+        console.error("CRITICAL: JWT_SECRET_KEY is missing in environment variables.");
+        // We still created the user, but we can't log them in. 
+        // This is a 500 error but we give a hint in the message if in dev mode.
+        return res.status(500).json({ 
+          message: "Server configuration error (JWT). Please contact support.",
+          error: process.env.NODE_ENV === "development" ? "JWT_SECRET_KEY is missing" : undefined
+        });
+      }
+
       res.status(201).json({
         _id: user._id,
         name: user.name,
@@ -51,8 +62,12 @@ export const registerUser = async (req, res) => {
       res.status(400).json({ message: "Invalid user data" });
     }
   } catch (error) {
-    console.error("Register User Error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Register User Error (Full):", error);
+    res.status(500).json({ 
+      message: "Server error during registration", 
+      error: error.message,
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined
+    });
   }
 };
 
@@ -72,6 +87,15 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
+    // Configuration Verification: Ensure JWT secret is present
+    if (!process.env.JWT_SECRET_KEY) {
+      console.error("CRITICAL: JWT_SECRET_KEY is missing in environment variables.");
+      return res.status(500).json({ 
+        message: "Server configuration error (JWT).",
+        error: process.env.NODE_ENV === "development" ? "JWT_SECRET_KEY is missing" : undefined
+      });
+    }
+
     res.status(200).json({
       _id: user._id,
       name: user.name,
@@ -81,8 +105,11 @@ export const login = async (req, res) => {
       token: tokenGenerate(user),
     });
   } catch (error) {
-    console.error("Login Error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Login Error (Full):", error);
+    res.status(500).json({ 
+      message: "Server error during login", 
+      error: error.message 
+    });
   }
 };
 

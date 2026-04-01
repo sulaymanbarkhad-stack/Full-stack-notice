@@ -80,7 +80,19 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-app.get("/", (req, res) => res.send("NoticeBoard API is running..."));
+// Middleware to ensure DB connection before handling requests
+app.use(async (req, res, next) => {
+  try {
+    await connect();
+    next();
+  } catch (error) {
+    console.error("Database connection failure in middleware:", error.message);
+    res.status(503).json({ 
+      message: "Database connection error. Please try again later.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined 
+    });
+  }
+});
 
 // Routes
 app.use("/api/auth", userRoutes);
@@ -108,19 +120,16 @@ const normalizePort = (value) => {
 const Port = normalizePort(process.env.PORT);
 
 const startServer = async () => {
-  try {
-    await connect();
     if (process.env.NODE_ENV !== 'production') {
-      app.listen(Port, () => {
-        console.log(`Server running on ${Port}`);
-      });
+      try {
+        await connect();
+        app.listen(Port, () => {
+          console.log(`Server running on ${Port}`);
+        });
+      } catch (error) {
+        console.error("Failed to start development server:", error.message);
+      }
     }
-  } catch (error) {
-    console.error(error);
-    if (process.env.NODE_ENV !== 'production') {
-      process.exit(1);
-    }
-  }
 };
 
 startServer();
