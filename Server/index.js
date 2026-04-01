@@ -15,6 +15,10 @@ dotenv.config();
 
 const app = express();
 
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 app.use(express.json());
 
 app.use(helmet());
@@ -22,7 +26,8 @@ app.use(helmet());
 const allowedOrigins = [
   "http://localhost:5173", 
   "http://localhost:5174", 
-  "https://full-stack-notice-fv3e.vercel.app"
+  "https://full-stack-notice-fv3e.vercel.app",
+  "https://full-stack-notice.vercel.app"
 ];
 
 if (process.env.CLIENT_URL) {
@@ -80,6 +85,8 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
+app.get("/", (req, res) => res.send("NoticeBoard API is running... (v2)"));
+
 // Middleware to ensure DB connection before handling requests
 app.use(async (req, res, next) => {
   try {
@@ -100,7 +107,15 @@ app.use("/api/notices", noticeRoutes);
 
 
 app.use((err, req, res, next) => {
-  console.error("Global Error Handler Catch:", err.message);
+  // Deep logging for production debugging
+  console.error("--- Global Error Logger ---");
+  console.error("Path:", req.path);
+  console.error("Method:", req.method);
+  console.error("Error Message:", err.message);
+  if (err.stack) {
+    console.error("Stack Trace:", err.stack);
+  }
+  console.error("---------------------------");
   
   // Specific handling for Multer errors or our custom Cloudinary config error
   if (err.message.includes("Cloudinary") || err.name === 'MulterError') {
@@ -109,7 +124,10 @@ app.use((err, req, res, next) => {
 
   const status = err.status || 500;
   const message = err.message || "Internal Server Error";
-  res.status(status).json({ message });
+  res.status(status).json({ 
+    message,
+    error: process.env.NODE_ENV === "development" ? err.message : undefined 
+  });
 });
 
 const normalizePort = (value) => {

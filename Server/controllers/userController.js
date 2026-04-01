@@ -12,6 +12,8 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: "Please add all fields" });
     }
 
+    console.log(`Attempting to register user: ${email}`);
+
     // check user exists
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -19,8 +21,10 @@ export const registerUser = async (req, res) => {
     }
 
     // Hash password
+    console.log("Hashing password...");
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
+    console.log("Password hashed successfully.");
 
     // Handle avatar image if provided
     let avatar = "";
@@ -29,6 +33,7 @@ export const registerUser = async (req, res) => {
     }
 
     // Create user
+    console.log("Creating user in database...");
     const user = await User.create({
       name,
       email,
@@ -36,20 +41,24 @@ export const registerUser = async (req, res) => {
       avatar,
       role: "user", // Default role
     });
+    console.log("User created successfully:", user._id);
 
     // response
     if (user) {
       // Configuration Verification: Ensure JWT secret is present
       if (!process.env.JWT_SECRET_KEY) {
         console.error("CRITICAL: JWT_SECRET_KEY is missing in environment variables.");
-        // We still created the user, but we can't log them in. 
-        // This is a 500 error but we give a hint in the message if in dev mode.
         return res.status(500).json({ 
-          message: "Server configuration error (JWT). Please contact support.",
+          message: "Server configuration error (JWT Secret missing).",
           error: process.env.NODE_ENV === "development" ? "JWT_SECRET_KEY is missing" : undefined
         });
       }
 
+      if (!process.env.JWT_EXPIREIN) {
+        console.warn("JWT_EXPIREIN is missing, defaulting to '7d'");
+      }
+
+      console.log("Generating token...");
       res.status(201).json({
         _id: user._id,
         name: user.name,
