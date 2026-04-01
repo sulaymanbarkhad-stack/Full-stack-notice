@@ -32,7 +32,7 @@ const allowedOrigins = [
 
 if (process.env.CLIENT_URL) {
   // Add CLIENT_URL if it exists and handles potential trailing slash
-  const cleanClientUrl = process.env.CLIENT_URL.replace(/\/$/, "");
+  const cleanClientUrl = process.env.Client_url.replace(/\/$/, "");
   if (!allowedOrigins.includes(cleanClientUrl)) {
     allowedOrigins.push(cleanClientUrl);
   }
