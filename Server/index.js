@@ -30,7 +30,7 @@ const allowedOrigins = [
   "https://full-stack-notice.vercel.app"
 ];
 
-if (process.env.CLIENT_URL) {
+if (process.env.Client_url) {
   // Add CLIENT_URL if it exists and handles potential trailing slash
   const cleanClientUrl = process.env.Client_url.replace(/\/$/, "");
   if (!allowedOrigins.includes(cleanClientUrl)) {
