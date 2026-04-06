@@ -53,4 +53,4 @@ A modern, high-performance SaaS application for managing board notices with real
 ```
 
 ---
-Built with ❤️ by the NoticeBoard Team.
+Built by my self.
