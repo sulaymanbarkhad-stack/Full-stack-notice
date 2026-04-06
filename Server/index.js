@@ -10,13 +10,12 @@ import helmet from "helmet";
 import cors from "cors";
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
-
 dotenv.config();
 
 const app = express();
 
-if (process.env.NODE_ENV === 'production') {
-  app.set('trust proxy', 1);
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
 }
 
 app.use(express.json());
@@ -24,15 +23,16 @@ app.use(express.json());
 app.use(helmet());
 
 const allowedOrigins = [
-  "http://localhost:5173", 
-  "http://localhost:5174", 
+  "http://localhost:5173",
+  "http://localhost:5174",
   "https://full-stack-notice-fv3e.vercel.app",
-  "https://full-stack-notice.vercel.app"
+  "https://full-stack-notice.vercel.app",
 ];
 
-if (process.env.Client_url) {
+const clientEnvUrl = process.env.CLIENT_URL || process.env.Client_url;
+if (clientEnvUrl) {
   // Add CLIENT_URL if it exists and handles potential trailing slash
-  const cleanClientUrl = process.env.Client_url.replace(/\/$/, "");
+  const cleanClientUrl = clientEnvUrl.replace(/\/$/, "");
   if (!allowedOrigins.includes(cleanClientUrl)) {
     allowedOrigins.push(cleanClientUrl);
   }
@@ -43,8 +43,8 @@ app.use(
     origin: function (origin, callback) {
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
-      
-      const isAllowed = allowedOrigins.some(allowedOrigin => {
+
+      const isAllowed = allowedOrigins.some((allowedOrigin) => {
         return origin === allowedOrigin || origin.startsWith(allowedOrigin);
       });
 
@@ -56,23 +56,27 @@ app.use(
       }
     },
     credentials: true,
-  })
+  }),
 );
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
-  message: "Too many requests from this user/IP, please try again after 15 minutes",
+  message:
+    "Too many requests from this user/IP, please try again after 15 minutes",
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req, res) => {
     // Check if the user is authenticated via Bearer token
-    if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
       const token = req.headers.authorization.split(" ")[1];
       try {
         // Synchronously verify token to extract the genuine user ID
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-        return decoded._id || decoded.id || ipKeyGenerator(req, res); 
+        return decoded._id || decoded.id || ipKeyGenerator(req, res);
       } catch (error) {
         // Fallback to IP if token is invalid or expired
         return ipKeyGenerator(req, res);
@@ -80,7 +84,7 @@ const limiter = rateLimit({
     }
     // Fallback to IP address for users who haven't logged in yet
     return ipKeyGenerator(req, res);
-  }
+  },
 });
 
 app.use(limiter);
@@ -94,9 +98,9 @@ app.use(async (req, res, next) => {
     next();
   } catch (error) {
     console.error("Database connection failure in middleware:", error.message);
-    res.status(503).json({ 
+    res.status(503).json({
       message: "Database connection error. Please try again later.",
-      error: process.env.NODE_ENV === "development" ? error.message : undefined 
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 });
@@ -104,7 +108,6 @@ app.use(async (req, res, next) => {
 // Routes
 app.use("/api/auth", userRoutes);
 app.use("/api/notices", noticeRoutes);
-
 
 app.use((err, req, res, next) => {
   // Deep logging for production debugging
@@ -116,17 +119,17 @@ app.use((err, req, res, next) => {
     console.error("Stack Trace:", err.stack);
   }
   console.error("---------------------------");
-  
+
   // Specific handling for Multer errors or our custom Cloudinary config error
-  if (err.message.includes("Cloudinary") || err.name === 'MulterError') {
+  if (err.message.includes("Cloudinary") || err.name === "MulterError") {
     return res.status(400).json({ message: err.message });
   }
 
   const status = err.status || 500;
   const message = err.message || "Internal Server Error";
-  res.status(status).json({ 
+  res.status(status).json({
     message,
-    error: process.env.NODE_ENV === "development" ? err.message : undefined 
+    error: process.env.NODE_ENV === "development" ? err.message : undefined,
   });
 });
 
@@ -138,16 +141,16 @@ const normalizePort = (value) => {
 const Port = normalizePort(process.env.PORT);
 
 const startServer = async () => {
-    if (process.env.NODE_ENV !== 'production') {
-      try {
-        await connect();
-        app.listen(Port, () => {
-          console.log(`Server running on ${Port}`);
-        });
-      } catch (error) {
-        console.error("Failed to start development server:", error.message);
-      }
+  if (process.env.NODE_ENV !== "production") {
+    try {
+      await connect();
+      app.listen(Port, () => {
+        console.log(`Server running on ${Port}`);
+      });
+    } catch (error) {
+      console.error("Failed to start development server:", error.message);
     }
+  }
 };
 
 startServer();

@@ -7,9 +7,14 @@ const connect = async () => {
     return;
   }
 
+  const mongoUri = process.env.MONGO_URI;
+  if (!mongoUri) {
+    throw new Error("MONGO_URI is not configured");
+  }
+
   try {
-    const db = await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 15000, 
+    const db = await mongoose.connect(mongoUri, {
+      serverSelectionTimeoutMS: 15000,
       connectTimeoutMS: 15000,
     });
     isConnected = db.connections[0].readyState === 1;

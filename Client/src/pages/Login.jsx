@@ -18,10 +18,13 @@ export default function Login() {
     e.preventDefault();
     setError("");
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL?.replace(/\/$/, '')}/api/auth/login`, {
-        email,
-        password,
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL?.replace(/\/$/, "")}/api/auth/login`,
+        {
+          email,
+          password,
+        },
+      );
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data));
       addToast("Welcome back! Login successful.", "success");
@@ -32,11 +35,14 @@ export default function Login() {
       }
     } catch (err) {
       console.error(err);
+      const statusCode = err.response?.status;
       const serverMsg = err.response?.data?.message;
       const displayMsg =
         serverMsg === "Invalid email or password"
-          ? "incorrect email or password"
-          : serverMsg || "Sorry, login un-successfull. (Login failed)";
+          ? "Incorrect email or password."
+          : statusCode === 503
+            ? "Service unavailable. Please try again later."
+            : "Sorry, login failed. Please try again.";
 
       setError(displayMsg);
       addToast(displayMsg, "error");
@@ -51,8 +57,12 @@ export default function Login() {
             <div className="inline-flex p-3.5 rounded-full bg-primary/10 text-primary mb-4">
               <LogIn size={28} />
             </div>
-            <h2 className="text-2xl font-bold text-text-primary">Welcome Back</h2>
-            <p className="text-text-secondary mt-1 text-sm">Sign in to your account</p>
+            <h2 className="text-2xl font-bold text-text-primary">
+              Welcome Back
+            </h2>
+            <p className="text-text-secondary mt-1 text-sm">
+              Sign in to your account
+            </p>
           </div>
 
           <form onSubmit={handleLogin} className="flex flex-col">
@@ -85,8 +95,13 @@ export default function Login() {
             </Button>
 
             <div className="text-center mt-8 text-sm">
-              <span className="text-text-secondary">Don't have an account? </span>
-              <Link to="/register" className="text-primary font-semibold hover:underline">
+              <span className="text-text-secondary">
+                Don't have an account?{" "}
+              </span>
+              <Link
+                to="/register"
+                className="text-primary font-semibold hover:underline"
+              >
                 Create one
               </Link>
             </div>
@@ -96,4 +111,3 @@ export default function Login() {
     </div>
   );
 }
-
